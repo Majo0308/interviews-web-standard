@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace TodoBack.Models
 {
@@ -8,6 +9,7 @@ namespace TodoBack.Models
         [Required]
         public string TagName { get; set; } = "";
         public string TagColor { get; set; } = "";
+        [JsonIgnore]
         public List<TaskTag> TaskTags { get; set; } = new();
 
     }

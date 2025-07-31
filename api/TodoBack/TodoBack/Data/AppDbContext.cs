@@ -13,11 +13,11 @@ namespace TodoBack.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<TaskTag>()
-                .HasKey(tt => new { tt.TaskId, tt.TagId });
+                .HasKey(tt => new { tt.TaskItemId, tt.TagId });
             modelBuilder.Entity<TaskTag>()
                 .HasOne(tt => tt.TaskItem)
                 .WithMany(t => t.TaskTags)
-                .HasForeignKey(tt => tt.TaskId);
+                .HasForeignKey(tt => tt.TaskItemId);
             modelBuilder.Entity<TaskTag>()
                 .HasOne(tt => tt.Tag)
                 .WithMany(t => t.TaskTags)
