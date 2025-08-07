@@ -15,12 +15,13 @@
     "nuxt": "^3.17.7",
     "openapi-fetch": "^0.14.0",
     "openapi-typescript": "^7.8.0",
+    "vite-plugin-vuetify": "^2.1.2",
     "vue": "^3.5.18",
     "vue-router": "^4.5.1"
   },
   "devDependencies": {
     "sass": "^1.90.0",
     "sass-loader": "^10.5.2",
-    "vuetify": "^3.5.11"
+    "vuetify": "^3.9.4"
   }
 }
