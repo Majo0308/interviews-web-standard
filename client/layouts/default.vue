@@ -3,6 +3,13 @@
   <v-app>
     <v-navigation-drawer app>
       <v-list>
+        <v-list-item @click="selectTag(0)">
+          <v-list-item-title>ALL TASKS</v-list-item-title></v-list-item
+        >
+        <v-list-item  @click="getCalendar()">
+          <v-list-item-title>CALENDAR</v-list-item-title></v-list-item
+        >
+        <v-divider></v-divider>
         <v-list-item
           v-for="tag in tags"
           :key="tag.tagId"
@@ -47,17 +54,21 @@ onMounted(() => {
 });
 
 function selectTag(id: number) {
+  navigateTo('/');
   selectedTag.value = id;
 }
 
+const getCalendar=async()=>{
+  navigateTo('/calendar');
+}
 const postTag = async () => {
   const newTag: TagType = {
-    tagId:0,
+    tagId: 0,
     tagName: tagName.value,
   };
 
   try {
-    const response =await fetchPostApi<TagType>("/Tags", newTag);
+    const response = await fetchPostApi<TagType>("/Tags", newTag);
     tags.value.push(response);
   } catch (err) {
     console.error("Error saving tag:", err);

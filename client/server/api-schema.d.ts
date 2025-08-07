@@ -13,6 +13,7 @@ export type TaskType = {
   taskCompleted: boolean;
   taskPriority: number;
   tags: TagType[];
+  subtasks: SubtaskType[];
 };
 
 export type TaskCreatedType = {
@@ -23,4 +24,15 @@ export type TaskCreatedType = {
   taskCompleted: boolean;
   taskPriority: number;
   tags: number[];
+  subtasks: SubtaskType[];
+};
+
+export type SubtaskStateType={
+  subtaskStateId: number;
+  subtaskStateName: string;
+}
+export type SubtaskType = {
+  subtaskId: number;
+  subtaskName: string;
+  subtaskStateId: number;
 };

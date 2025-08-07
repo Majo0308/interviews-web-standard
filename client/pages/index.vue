@@ -24,7 +24,7 @@
 <script setup lang="ts">
 import { inject, ref, watch, onMounted, computed, type Ref } from 'vue'
 import TaskForm from '~/components/TaskForm.vue'
-import { fetchGetByIdApi } from '~/server/api'
+import { fetchGetApi, fetchGetByIdApi } from '~/server/api'
 import type { TagType, TaskType } from '~/server/api-schema'
 
 // Inject selected tag ID (reactive)
@@ -45,7 +45,14 @@ const getTasksByTag = async (newTagId: number) => {
     console.error('Error loading tasks:', err.message)
   }
 }
-
+const getTasks = async () => {
+  try {
+    const response=await fetchGetApi<TaskType[]>("/Tasks")
+    tasks.value = response
+  } catch (err: any) {
+    console.error('Error loading tasks:', err.message)
+  }
+}
 //Reload tasks based on selected tag (defaults to tag ID 1)
 const reloadTasks = async () => {
   const id = tagId.value || 1
@@ -59,8 +66,11 @@ onMounted(() => {
 
 // Reload tasks when the selected tag changes
 watch(tagId, (newTagId) => {
-  if (newTagId != null) {
+  if (newTagId != null && newTagId != 0) {
     getTasksByTag(newTagId)
+  }
+  else{
+    getTasks();
   }
 })
 
