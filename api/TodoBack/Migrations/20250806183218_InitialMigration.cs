@@ -6,11 +6,24 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TodoBack.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "SubtaskStates",
+                columns: table => new
+                {
+                    SubtaskStateId = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    StateName = table.Column<string>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SubtaskStates", x => x.SubtaskStateId);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Tags",
                 columns: table => new
@@ -44,6 +57,33 @@ namespace TodoBack.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Subtasks",
+                columns: table => new
+                {
+                    SubtaskId = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    SubtaskName = table.Column<string>(type: "TEXT", nullable: false),
+                    TaskItemId = table.Column<int>(type: "INTEGER", nullable: false),
+                    SubtaskStateId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Subtasks", x => x.SubtaskId);
+                    table.ForeignKey(
+                        name: "FK_Subtasks_SubtaskStates_SubtaskStateId",
+                        column: x => x.SubtaskStateId,
+                        principalTable: "SubtaskStates",
+                        principalColumn: "SubtaskStateId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Subtasks_Tasks_TaskItemId",
+                        column: x => x.TaskItemId,
+                        principalTable: "Tasks",
+                        principalColumn: "TaskItemId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "TaskTags",
                 columns: table => new
                 {
@@ -68,6 +108,16 @@ namespace TodoBack.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Subtasks_SubtaskStateId",
+                table: "Subtasks",
+                column: "SubtaskStateId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Subtasks_TaskItemId",
+                table: "Subtasks",
+                column: "TaskItemId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_TaskTags_TagId",
                 table: "TaskTags",
                 column: "TagId");
@@ -77,7 +127,13 @@ namespace TodoBack.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "Subtasks");
+
+            migrationBuilder.DropTable(
                 name: "TaskTags");
+
+            migrationBuilder.DropTable(
+                name: "SubtaskStates");
 
             migrationBuilder.DropTable(
                 name: "Tags");

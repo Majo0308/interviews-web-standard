@@ -15,6 +15,7 @@ namespace TodoBack.Models
         public int TaskPriority { get; set; } = 0;
         [JsonIgnore]
         public List<TaskTag> TaskTags { get; set; } = new();
+        public List<Subtask> Subtasks { get; set; } = new();
 
     }
 }

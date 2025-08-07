@@ -1,43 +1,81 @@
 ﻿using TodoBack.Data;
 using Microsoft.EntityFrameworkCore;
 using TodoBack.Models;
+using TodoBack.Models.DTO;
+using AutoMapper;
 namespace TodoBack.Services
 {
     public class TaskService: ITaskService
     {
         private readonly AppDbContext _context;
-        public TaskService(AppDbContext context)
+        private readonly IMapper _mapper;
+        public TaskService(AppDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper =mapper;
         }   
-        public async Task<List<TaskItem>> GetAllAsync()
+        public async Task<List<TaskDto>> GetAllAsync()
         {
-            return await _context.Tasks.Include(t => t.TaskTags)
-                .ThenInclude(tt => tt.Tag)
-                .ToListAsync();
-        }
-        public async Task<TaskItem?> GetByIdAsync(int id)
-        {
-            return await _context.Tasks
+           var taskItems = await _context.Tasks
                 .Include(t => t.TaskTags)
-                .ThenInclude(tt => tt.Tag)
-                .FirstOrDefaultAsync(t => t.TaskItemId == id);
+                    .ThenInclude(tt => tt.Tag)
+                .Include(t => t.Subtasks)
+                .ToListAsync();
+            return _mapper.Map<List<TaskDto>>(taskItems);
+
+
+        }
+        public async Task<TaskDto?> GetByIdAsync(int id)
+        {
+            var taskItem = await _context.Tasks
+               .Include(t => t.TaskTags)
+                   .ThenInclude(tt => tt.Tag)
+               .Include(t => t.Subtasks)
+               .FirstOrDefaultAsync(t => t.TaskItemId == id);
+            return taskItem == null ? null : _mapper.Map<TaskDto>(taskItem);
+        }
+        public async Task<List<TaskDto>> GetTaskByTagId(int id)
+        {
+            var tasks = await _context.Tasks
+                .Include(t => t.TaskTags)
+                    .ThenInclude(tt => tt.Tag)
+                .Include(t => t.Subtasks)
+                .Where(t => t.TaskTags.Any(tt => tt.TagId == id))
+                .ToListAsync();
+
+            return _mapper.Map<List<TaskDto>>(tasks);
         }
 
-        public async Task<TaskItem> CreateAsync(TaskItem taskItem)
+        public async Task<TaskItem> CreateAsync(TaskCreateDto taskDto)
         {
+            var taskItem = _mapper.Map<TaskItem>(taskDto);
             _context.Tasks.Add(taskItem);
             await _context.SaveChangesAsync();
-            return taskItem;
-        }   
+            if (taskDto.Tags?.Any() == true)
+            {
+                taskItem.TaskTags = taskDto.Tags
+                    .Select(tagId => new TaskTag { TaskItemId = taskItem.TaskItemId, TagId = tagId })
+                    .ToList();
 
-        public async Task<TaskItem> UpdateAsync(TaskItem taskItem)
-        {
-            _context.Tasks.Update(taskItem);
-            await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
+            }
             return taskItem;
         }
 
+        public async Task<TaskItem?> UpdateAsync(int id, TaskCreateDto taskDto)
+        {
+            var task = await _context.Tasks
+                .Include(t => t.Subtasks)
+                .Include(t => t.TaskTags)
+                .FirstOrDefaultAsync(t => t.TaskItemId == id);
+
+            if (task == null) return null;
+
+            _mapper.Map(taskDto, task);
+            await _context.SaveChangesAsync();
+
+            return task;
+        }
         public async Task<bool> DeleteAsync(int id)
         {
             var taskItem = await _context.Tasks.FindAsync(id);

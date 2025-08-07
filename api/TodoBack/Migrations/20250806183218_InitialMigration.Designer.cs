@@ -11,14 +11,54 @@ using TodoBack.Data;
 namespace TodoBack.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250731234345_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250806183218_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.7");
+
+            modelBuilder.Entity("TodoBack.Models.Subtask", b =>
+                {
+                    b.Property<int>("SubtaskId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("SubtaskName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("SubtaskStateId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TaskItemId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("SubtaskId");
+
+                    b.HasIndex("SubtaskStateId");
+
+                    b.HasIndex("TaskItemId");
+
+                    b.ToTable("Subtasks");
+                });
+
+            modelBuilder.Entity("TodoBack.Models.SubtaskState", b =>
+                {
+                    b.Property<int>("SubtaskStateId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("StateName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("SubtaskStateId");
+
+                    b.ToTable("SubtaskStates");
+                });
 
             modelBuilder.Entity("TodoBack.Models.Tag", b =>
                 {
@@ -83,6 +123,25 @@ namespace TodoBack.Migrations
                     b.HasIndex("TagId");
 
                     b.ToTable("TaskTags");
+                });
+
+            modelBuilder.Entity("TodoBack.Models.Subtask", b =>
+                {
+                    b.HasOne("TodoBack.Models.SubtaskState", "SubtaskState")
+                        .WithMany()
+                        .HasForeignKey("SubtaskStateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TodoBack.Models.TaskItem", "TaskItem")
+                        .WithMany()
+                        .HasForeignKey("TaskItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SubtaskState");
+
+                    b.Navigation("TaskItem");
                 });
 
             modelBuilder.Entity("TodoBack.Models.TaskTag", b =>

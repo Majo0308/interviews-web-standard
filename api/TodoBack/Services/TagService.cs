@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using TodoBack.Data;
 using TodoBack.Models;
 
@@ -10,6 +11,7 @@ namespace TodoBack.Services
         public TagService(AppDbContext context)
         {
             _context = context;
+
         }
         public async Task<List<Tag>> GetAllAsync()
         {

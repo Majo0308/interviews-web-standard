@@ -9,7 +9,9 @@ namespace TodoBack.Data
         {        }
         public DbSet<TaskItem> Tasks => Set<TaskItem>();
         public DbSet<Tag> Tags => Set<Tag>();
-        public DbSet<TaskTag> TaskTags => Set<TaskTag>();    
+        public DbSet<TaskTag> TaskTags => Set<TaskTag>();
+        public DbSet<Subtask> Subtasks=> Set<Subtask>();
+        public DbSet<SubtaskState> SubtaskStates=>  Set<SubtaskState>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<TaskTag>()
