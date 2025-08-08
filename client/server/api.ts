@@ -54,7 +54,7 @@ export async function fetchPutApi<T>(id:any, path: string, body: any): Promise<T
     headers: {
       "Content-Type": "application/json",
     },
-    body: body,
+    body: JSON.stringify(body),
   });
 
   if (!response.ok) {

@@ -1,31 +1,29 @@
-import { ref } from "vue";
-import { fetchGetByIdApi } from "~/server/api";
+import { ref, computed } from "vue";
+import { fetchGetApi, fetchGetByIdApi } from "~/server/api";
 import type { TaskType } from "~/server/api-schema";
 
-const tasks = ref<TaskType[]>([]);
-
 export function useTasks() {
-  const getTasksByTag = async (tagId: number) => {
+  const tasks = ref<TaskType[]>([]);
+
+  const loadTasks = async (tagId?: number) => {
     try {
-      const response=await fetchGetByIdApi<TaskType[]>(tagId, "/Tasks/by-tags");
-      tasks.value=response;
+      if (tagId && tagId !== 0) {
+        tasks.value = await fetchGetByIdApi<TaskType[]>(tagId, "/Tasks/by-tags");
+      } else {
+        tasks.value = await fetchGetApi<TaskType[]>("/Tasks");
+      }
     } catch (err: any) {
-      console.error(err.message);
+      console.error("Error loading tasks:", err.message);
     }
   };
 
-  const editTask = (task: TaskType) => {
-    console.log("Edit task", task);
-  };
-
-  const deleteTask = (task: TaskType) => {
-    console.log("Delete task", task);
-  };
+  const completedTasks = computed(() => tasks.value.filter(t => t.taskCompleted));
+  const incompletedTasks = computed(() => tasks.value.filter(t => !t.taskCompleted));
 
   return {
     tasks,
-    getTasksByTag,
-    editTask,
-    deleteTask,
+    loadTasks,
+    completedTasks,
+    incompletedTasks
   };
 }

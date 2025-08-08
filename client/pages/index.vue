@@ -1,85 +1,116 @@
 <template>
   <div class="pa-4">
-    <!-- Header -->
+    <!-- Header section with title and task form -->
     <div class="d-flex justify-space-between align-center mb-4">
       <h1 class="text-h5">Tasks</h1>
+      <!-- TaskForm component to add or edit tasks -->
+      <TaskForm
+        :tags="tags"
+        :onSaved="reloadTasks"
+        v-model="editingTask"
+        :isEdit="isEditing"
+      />
     </div>
 
-    <!-- Task form to add a new task -->
-    <TaskForm :tags="tags" :onSaved="reloadTasks" />
+    <!-- Toggleable card to show/hide incompleted tasks -->
+    <v-card
+      class="ma-2 mb-1"
+      @click="toggleIncompleted"
+      style="background-color: #f2f2f2"
+    >
+      <v-card-text>
+        <div style="display: flex; justify-content: space-between">
+          <div>INCOMPLETED</div>
 
-    <!-- Task list -->
-    <v-list>
+          <!-- Icon indicates whether the section is expanded or collapsed -->
+          <v-icon size="small">
+            {{ showIncompleted ? "mdi-chevron-up" : "mdi-chevron-down" }}
+          </v-icon>
+        </div>
+      </v-card-text>
+    </v-card>
+    <!-- List of incompleted tasks, visible only when showIncompleted is true -->
+    <v-list v-show="showIncompleted">
       <v-list-item
-        v-for="task in filteredTasks"
-        :key="`task-${task.taskItemId}`"
+        v-for="task in incompletedTasks"
+        :key="task.taskItemId"
         class="pa-0"
       >
-        <TaskCard :task="task" />
+        <!-- TaskCard component for each incompleted task -->
+        <TaskCard :task="task" @edit="startEditing" :getTasks="reloadTasks" />
+      </v-list-item>
+    </v-list>
+
+    <!-- Toggleable card to show/hide completed tasks -->
+    <v-card
+      style="background-color: #f2f2f2"
+      class="ma-2"
+      @click="toggleCompleted"
+    >
+      <v-card-text>
+        <div style="display: flex; justify-content: space-between">
+          <div>COMPLETED</div>
+
+          <!-- Icon indicates whether the section is expanded or collapsed -->
+          <v-icon size="small">
+            {{ showCompleted ? "mdi-chevron-up" : "mdi-chevron-down" }}
+          </v-icon>
+        </div>
+      </v-card-text>
+    </v-card>
+    <!-- List of completed tasks, visible only when showCompleted is true -->
+    <v-list v-show="showCompleted">
+      <v-list-item
+        v-for="task in completedTasks"
+        :key="task.taskItemId"
+        class="pa-0"
+      >
+        <!-- TaskCard component for each completed task -->
+        <TaskCard :task="task" @edit="startEditing" :getTasks="reloadTasks" />
       </v-list-item>
     </v-list>
   </div>
 </template>
 
 <script setup lang="ts">
-import { inject, ref, watch, onMounted, computed, type Ref } from 'vue'
-import TaskForm from '~/components/TaskForm.vue'
-import { fetchGetApi, fetchGetByIdApi } from '~/server/api'
-import type { TagType, TaskType } from '~/server/api-schema'
+import { inject, ref, watch, onMounted, type Ref } from "vue";
+import TaskForm from "~/components/TaskForm.vue";
+import TaskCard from "~/components/TaskCard.vue";
+import type { TagType, TaskCreatedType, TaskType } from "~/server/api-schema";
+import { useTasks } from "~/composables/useTasks";
 
-// Inject selected tag ID (reactive)
-const tagId = inject<Ref<number | undefined>>('selectedTag', ref(undefined))
+// Composable that manages loading tasks and separating completed/incompleted tasks
+const { completedTasks, incompletedTasks, loadTasks } = useTasks();
 
-// Inject available tags
-const tags = inject<TagType[]>('tags', []) ?? []
+// Reactive states to control visibility of completed and incompleted task lists
+const showCompleted = ref(true);
+const showIncompleted = ref(true);
 
-// Reactive list of tasks
-const tasks = ref<TaskType[]>([])
+// Holds the task currently being edited; null if no edit in progress
+const editingTask = ref<TaskCreatedType | null>(null);
+const isEditing = ref(false);
 
-//Fetch tasks by tag ID from API and update the tasks list
-const getTasksByTag = async (newTagId: number) => {
-  try {
-    const response=await fetchGetByIdApi<TaskType[]>(newTagId, "/Tasks/by-tags")
-    tasks.value = response
-  } catch (err: any) {
-    console.error('Error loading tasks:', err.message)
-  }
-}
-const getTasks = async () => {
-  try {
-    const response=await fetchGetApi<TaskType[]>("/Tasks")
-    tasks.value = response
-  } catch (err: any) {
-    console.error('Error loading tasks:', err.message)
-  }
-}
-//Reload tasks based on selected tag (defaults to tag ID 1)
-const reloadTasks = async () => {
-  const id = tagId.value || 1
-  await getTasksByTag(id)
-}
+// Inject the selected tag ID and the list of tags from the parent or layout
+const tagId = inject<Ref<number | undefined>>("selectedTag", ref(undefined));
+const tags = inject<TagType[]>("tags", []) ?? [];
 
-// Initial load
-onMounted(() => {
-  reloadTasks()
-})
+// Function to reload tasks based on the currently selected tag
+const reloadTasks = () => loadTasks(tagId.value || 0);
 
-// Reload tasks when the selected tag changes
-watch(tagId, (newTagId) => {
-  if (newTagId != null && newTagId != 0) {
-    getTasksByTag(newTagId)
-  }
-  else{
-    getTasks();
-  }
-})
+// Toggle functions for collapsing/expanding task lists
+const toggleCompleted = () => (showCompleted.value = !showCompleted.value);
+const toggleIncompleted = () =>
+  (showIncompleted.value = !showIncompleted.value);
 
-// Computed list of tasks (can apply filters in the future)
-const filteredTasks = computed(() => tasks.value)
+// When editing a task, prepare a copy with tag IDs for the form model
+const startEditing = (task: TaskType) => {
+  editingTask.value = { ...task, tags: task.tags.map((t) => t.tagId) };
+  isEditing.value = true;
+};
+
+// Watch the selected tag ID and reload tasks when it changes
+watch(tagId, reloadTasks);
+
+// Load tasks when component is mounted
+onMounted(reloadTasks);
 </script>
-
-<style scoped>
-.text-decoration-line-through {
-  text-decoration: line-through;
-}
-</style>

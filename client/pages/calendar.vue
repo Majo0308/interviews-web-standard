@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <v-container>
     <v-sheet
       class="d-flex"
       height="54"
@@ -33,7 +33,7 @@
         :weekdays="weekday"
       ></v-calendar>
     </v-sheet>
-  </div>
+</v-container>
 </template>
 
 <script>

@@ -36,3 +36,12 @@ export type SubtaskType = {
   subtaskName: string;
   subtaskStateId: number;
 };
+
+export type SubtaskTaskType = {
+  subtaskId: number;
+  subtaskName: string;
+  subtaskStateId: number;
+  taskName:string;
+  taskDueDate: string;
+  
+};

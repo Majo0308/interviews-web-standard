@@ -45,25 +45,32 @@
     <h2 class="text-h6 mt-6 mb-4">Subtasks</h2>
     <v-row>
       <v-col cols="12" md="4" v-for="state in subtaskStates" :key="state.id">
-        <v-card class="pa-2">
+        <v-card
+          class="pa-2"
+          :style="{
+            borderLeft: `4px solid ${state.color}`,
+            backgroundColor: '#FAFAFA',
+          }"
+        >
           <v-card-title class="text-subtitle-1 font-weight-bold">
             {{ state.label }}
           </v-card-title>
           <v-divider />
           <v-card-text>
-            <v-list density="compact">
+            <v-list density="compact" style="background-color: #fafafa">
               <v-list-item
                 v-for="sub in getSubtasksByState(state.id)"
                 :key="sub.subtaskId"
-                class=""
+                style="border-radius: 5px; background-color: white"
+                class="mb-1"
               >
-                <div class="mb-2">{{ sub.subtaskName }}</div>
+                <div class="mb-2 mt-2">{{ sub.subtaskName }}</div>
                 <div class="d-flex gap-2">
                   <v-col cols="auto">
                     <v-btn
                       size="small"
                       icon="mdi-clipboard-text-clock-outline"
-                      @click="updateSubtaskState(sub.subtaskId, 2)"
+                      @click="updateSubtaskState(sub, 1)"
                       :style="
                         sub.subtaskStateId === 1
                           ? {
@@ -77,7 +84,7 @@
                     <v-btn
                       size="small"
                       icon="mdi-clipboard-text-play-outline"
-                      @click="updateSubtaskState(sub.subtaskId, 3)"
+                      @click="updateSubtaskState(sub, 2)"
                       class="ma-0 mr-2"
                       :style="
                         sub.subtaskStateId === 2
@@ -91,10 +98,10 @@
                     <v-btn
                       size="small"
                       icon="mdi-clipboard-check-outline"
-                      @click="updateSubtaskState(sub.subtaskId, 3)"
+                      @click="updateSubtaskState(sub, 3)"
                       class="ma-0"
                       :style="
-                        sub.subtaskStateId === 2
+                        sub.subtaskStateId === 3
                           ? {
                               color: 'white',
                               backgroundColor: '#5fce73',
@@ -103,20 +110,6 @@
                       "
                     ></v-btn>
                   </v-col>
-                  <!-- <v-btn
-                    v-for="btnState in subtaskStates"
-                    :key="btnState.id"
-                    size="x-small"
-                    :color="btnState.color"
-                    variant="flat"
-                    :class="{
-                      'text-white': sub.subtaskStateId === btnState.id,
-                      'opacity-50': sub.subtaskStateId !== btnState.id,
-                    }"
-                    @click="updateSubtaskState(sub.subtaskId, btnState.id)"
-                  >
-                    {{ btnState.labelShort }}
-                  </v-btn> -->
                 </div>
               </v-list-item>
             </v-list>
@@ -131,16 +124,16 @@
 import { format } from "date-fns";
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
-import { fetchGetByIdApi } from "~/server/api";
+import { fetchGetByIdApi, fetchPutApi } from "~/server/api";
 import type { TaskType, SubtaskType } from "~/server/api-schema";
 
 const route = useRoute();
 const task = ref<TaskType | null>(null);
 
 const subtaskStates = [
-  { id: 1, label: "Pendant", labelShort: "ToDo", color: "red" },
-  { id: 2, label: "In Progress", labelShort: "Doing", color: "orange" },
-  { id: 3, label: "Done", labelShort: "Done", color: "green" },
+  { id: 1, label: "Pendant", labelShort: "ToDo", color: "#F26B50" },
+  { id: 2, label: "In Progress", labelShort: "Doing", color: "#F2C450" },
+  { id: 3, label: "Done", labelShort: "Done", color: "#96CF76" },
 ];
 
 const getSubtasksByState = (stateId: number) => {
@@ -151,13 +144,18 @@ const getSubtasksByState = (stateId: number) => {
   );
 };
 
-const updateSubtaskState = async (subtaskId: number, newStateId: number) => {
+const updateSubtaskState = async (
+  subtaskSent: SubtaskType,
+  newStateId: number
+) => {
   try {
-    await fetchGetByIdApi(subtaskId, `/Subtasks`);
+    await fetchPutApi(subtaskSent?.subtaskId, `/Subtasks`, {
+      ...subtaskSent,
+      subtaskStateId: newStateId,
+    });
 
-    // Actualiza localmente
     const subtask = task.value?.subtasks.find(
-      (s: SubtaskType) => s.subtaskId === subtaskId
+      (s: SubtaskType) => s.subtaskId === subtaskSent.subtaskId
     );
     if (subtask) {
       subtask.subtaskStateId = newStateId;
