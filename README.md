@@ -1,79 +1,80 @@
-# Web Development Interview Test
+# Task Management Application
 
-## Introduction
-Welcome to the web development interview test! This task is designed to assess your skills in both backend and frontend development. You will create a simple task application with an API and a client frontend. Follow the instructions carefully and make sure to demonstrate best practices in coding, structure, and git usage.
+This repository contains both the **backend** API and the **frontend** client for a task management system with support for tasks, subtasks, tags, and calendar views.
 
-## Project Structure
-You will find two folders in the repository:
-- `api`
-- `client`
+---
 
-You are required to implement the following within these folders.
+## Project Status
 
-## Task Description
+- ✅ Backend API is fully functional, including all necessary CRUD methods.  
+- ✅ Frontend client supports task and tag creation, editing, and deletion.  
+- ✅ Subtasks can be viewed and managed by their states.  
+- ✅ Calendar view available to visualize tasks over time.
 
-### API Project
-1. **Technology**: Use [ASP.NET](https://dotnet.microsoft.com/en-us/apps/aspnet/apis) in .NET 8 written in C#.
-2. **Database**: Use SQLite for the database.
-3. **ORM**: Use [Entity Framework](https://learn.microsoft.com/en-us/ef/core/) Core as the ORM.
-4. **Functionality**: 
-    - Create a `Task` model representing a single task.
-    - Additionally, create a `Tag` model to represent tags that can be associated with tasks.
-    - Implement a many-to-many relationship between `Task` and `Tag` using a join table.
-    - Create endpoints for basic CRUD operations:
-        - `GET /api/tasks`: Retrieve all tasks.
-        - `GET /api/tasks/{id}`: Retrieve a specific task by id.
-        - `POST /api/tasks`: Create a new task.
-        - `PUT /api/tasks/{id}`: Update an existing task.
-        - `DELETE /api/tasks/{id}`: Delete a task.
-        - `GET /api/tags`: Retrieve all tags.
-        - `POST /api/tags`: Create a new tag.
-        - `PUT /api/tags/{id}`: Update an existing tag.
-        - `GET /api/tags/{id}/tasks`: Get all tasks for a tag.
-        - `DELETE /api/tags/{id}`: Delete a tag.
-        - `POST /api/tasks/{id}/tags`: Associate tags with a task.
-    - Ensure proper validation, error handling, and logging.
-5. **Best Practices**: Follow [RESTful principles](https://restfulapi.net/resource-naming/) for API design.
+---
 
-### Client Project
-1. **Technology**: Use [Nuxt 3](https://nuxt.com/docs/getting-started/installation) for the frontend application.
-2. **Functionality**:
-    - Create a user interface to display the list of tasks.
-    - Allow users to add, update, and delete tasks.
-    - Allow users to add, update, and delete tags.
-    - Allow users to assign tags to tasks.
-    - Interact with the API to perform these operations.
-3. **UI/UX**: Ensure the interface is user-friendly and visually appealing.
+## Backend
 
-## Git Workflow
-1. **Forking**: Fork this repository to your own GitHub account.
-2. **Branching**: Use a feature-branch workflow. Create branches for different functionalities (e.g., `feature/api-setup`, `feature/client-setup`).
-3. **Commits**: Make frequent, clear, and descriptive commits.
-4. **Pull Requests**: Once you've completed a feature, create a pull request to merge it into your main branch. Include descriptive messages with your pull requests.
-5. **Git Ignore**: Make sure only the necessary files are saved to the repository. Make proper use of gitignore. 
+The backend is implemented with ASP.NET Core Web API and provides endpoints for managing:
 
-## Additional Requirements
-- **Documentation**: Add comments to your code where necessary and provide a brief documentation on how to set up and run the project.
-- **Creativity**: Feel free to add any additional features or improvements that you think would make this project stand out.
-- **BONUS: Testing**: Implement unit tests for the API or client using a framework of your choice.
+- Tasks  
+- Subtasks  
+- Tags  
 
-## Submission
-1. Ensure your project is well-documented.
-2. Share the link to your forked repository with us.
-3. Be prepared to discuss your code, decisions, and any challenges you faced during the development in a follow-up interview.
+---
 
-## Evaluation Criteria
-- Adherence to best practices and coding standards.
-- Clean and maintainable code.
-- Proper use of git and version control best practices.
-- User experience and design of the frontend application.
-- Creativity and any additional features implemented.
-- Documentation and code comments.
+## Frontend
 
-## Getting Started
-1. Clone your forked repository to your local machine.
-2. Set up the database and run the migrations.
-3. Implement the required functionalities in both the `api` and `client` projects.
-4. Submit your work as described in the submission section.
+The frontend is built with Vue 3 and Vuetify, providing:
 
-We look forward to seeing your solution!
+- Responsive UI for task and tag management  
+- Detailed views and state management for subtasks  
+- Calendar view for scheduling and tracking tasks  
+
+---
+
+## Screenshots
+
+### Task List and Task Form  
+<img width="1898" height="896" alt="image" src="https://github.com/user-attachments/assets/499cbfec-5836-4e8b-87cf-6c431a027a56" />
+<img width="1893" height="905" alt="image" src="https://github.com/user-attachments/assets/1d61808b-e753-4ab5-a58c-5c3ee425f22c" />
+
+
+_Task list showing tasks with options to edit, delete, and add tags._
+
+### Subtask Board  
+<img width="1889" height="898" alt="image" src="https://github.com/user-attachments/assets/f92dd489-51e1-436f-99df-17bfb9782197" />
+<img width="1894" height="907" alt="image" src="https://github.com/user-attachments/assets/cac59cb3-a394-47ef-acc5-a4870dedba4f" />
+
+_Subtasks organized by state with ability to update status._
+
+### Calendar View  
+<img width="1893" height="904" alt="image" src="https://github.com/user-attachments/assets/8f647a76-b053-49ae-b3d8-7686535f7c77" />
+
+---
+
+## How to Run
+
+
+### Backend  
+- Run the ASP.NET Core API project (`dotnet run` or via Visual Studio).  
+- API endpoints are available at `https://localhost:7064/api`.
+
+### Frontend  
+- Install dependencies: `npm install`  
+- Run the Vue app: `npm run dev`  
+- The app will open at `http://localhost:3000`.
+
+---
+
+## Notes
+
+- Testing is pending and will be added soon.  
+- Contributions and feedback are welcome!
+
+---
+
+## Contact
+
+For questions or suggestions, please open an issue or contact the maintainer.
+
