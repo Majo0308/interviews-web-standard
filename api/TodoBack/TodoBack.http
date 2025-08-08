@@ -1,0 +1,6 @@
+@TodoBack_HostAddress = http://localhost:5033
+
+GET {{TodoBack_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
