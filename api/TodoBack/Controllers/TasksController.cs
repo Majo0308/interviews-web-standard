@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using TodoBack.Models;
 using TodoBack.Models.DTO;
 using TodoBack.Services;
 
@@ -50,19 +51,25 @@ namespace TodoBack.Controllers
             var updated = await _service.UpdateAsync(id, task);
             return updated is null ? NotFound() : Ok(updated);
         }
+        [HttpGet("completed/{id}")]
+        public async Task<ActionResult<TaskItem>> Complete(int id)
+        {
 
+            var updated = await _service.CompleteAsync(id);
+            return updated is null ? NotFound() : Ok(updated);
+        }
         [HttpDelete("{id}")]
-        public async Task<ActionResult> Delete(int id)
+        public async Task<ActionResult<int>> Delete(int id)
         {
             var success = await _service.DeleteAsync(id);
-            return success ? NoContent() : NotFound();
+            return success ? id : NotFound();
         }
 
         [HttpPost("{id}/tags")]
-        public async Task<ActionResult> AssignTags(int id, [FromBody] List<int> tagIds)
+        public async Task<ActionResult<bool>> AssignTags(int id, [FromBody] List<int> tagIds)
         {
             var success = await _service.AssignTagsAsync(id, tagIds);
-            return success ? NoContent() : NotFound();
+            return success ? success : NotFound();
         }
     }
 }

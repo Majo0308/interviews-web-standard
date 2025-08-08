@@ -25,7 +25,8 @@ namespace TodoBack.Models.DTO
         public bool TaskCompleted { get; set; }= false;
         public int TaskPriority { get; set; } = 2;
         public List<int> Tags { get; set; } = new();
-        
+        public List<SubtaskDto> Subtasks { get; set; } = new();
+
     }
 
 

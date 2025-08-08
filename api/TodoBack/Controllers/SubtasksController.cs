@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using TodoBack.Models;
 using TodoBack.Models.DTO;
 using TodoBack.Services;
 
@@ -15,7 +16,7 @@ namespace TodoBack.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<SubtaskDto>>> GetAll()
+        public async Task<ActionResult<List<SubtaskStateDto>>> GetAll()
         {
             var subtasks = await _subtaskService.GetAllAsync();
             return Ok(subtasks);

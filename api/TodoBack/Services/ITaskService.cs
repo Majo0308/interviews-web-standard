@@ -10,7 +10,7 @@ namespace TodoBack.Services
         Task<TaskItem> CreateAsync(TaskCreateDto taskItem);
         Task<TaskItem> UpdateAsync(int id, TaskCreateDto taskItem);
         Task<bool> DeleteAsync(int id);
-        Task<bool> CompleteAsync(int id);
+        Task<TaskItem?> CompleteAsync(int id);
         Task<bool> AssignTagsAsync(int taskId, List<int> tagIds);
     }
 }

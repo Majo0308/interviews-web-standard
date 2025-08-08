@@ -15,11 +15,26 @@ namespace TodoBack.Services
             _mapper = mapper;
             _context = context;
         }
-        public async Task<List<SubtaskDto>> GetAllAsync()
+        public async Task<List<SubtaskStateDto>> GetAllAsync()
         {
-            var subtasks= await _context.Subtasks.ToListAsync();
-            return _mapper.Map<List<SubtaskDto>>(subtasks);
+            var subtasks = await _context.Subtasks
+                .Include(s => s.TaskItem)              // Incluir tarea relacionada
+                .Include(s => s.SubtaskState)      // Incluir estado relacionado (si existe)
+                .Select(s => new SubtaskStateDto
+                {
+                    SubtaskId = s.SubtaskId,
+                    SubtaskName = s.SubtaskName,
+                    TaskItemId = s.TaskItemId,
+                    SubtaskStateId = s.SubtaskStateId,
+                    StateName = s.SubtaskState != null ? s.SubtaskState.StateName : null,
+                    TaskName = s.TaskItem != null ? s.TaskItem.TaskName : null,
+                    TaskDueDate = s.TaskItem != null ? s.TaskItem.TaskDueDate : DateTime.MinValue
+                })
+                .ToListAsync();
+
+            return subtasks;
         }
+
         public async Task<SubtaskDto?> GetByIdAsync(int id)
         {
             var subtasks= await _context.Subtasks.FindAsync(id);
@@ -37,8 +52,6 @@ namespace TodoBack.Services
             _context.Subtasks.Add(subtask);
             await _context.SaveChangesAsync();
             return _mapper.Map<SubtaskDto>(subtask);
-
-
         }
         public async Task<SubtaskDto?> UpdateAsync(int id, SubtaskDto subtaskDto)
         {

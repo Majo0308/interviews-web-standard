@@ -16,7 +16,7 @@ namespace TodoBack.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Tag>>> GetAll()
+        public async Task<ActionResult<List<Tag>>> GetAll()
         {
             var tags = await _tagService.GetAllAsync();
             return Ok(tags);
@@ -38,22 +38,22 @@ namespace TodoBack.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, Tag tag)
+        public async Task<ActionResult<Tag>> Update(int id, Tag tag)
         {
             if (id != tag.TagId) return BadRequest();
 
             var updated = await _tagService.UpdateAsync(tag);
 
-            return NoContent();
+            return updated;
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<ActionResult<bool>> Delete(int id)
         {
             var deleted = await _tagService.DeleteAsync(id);
             if (!deleted) return NotFound();
 
-            return NoContent();
+            return deleted;
         }
     }
 }
