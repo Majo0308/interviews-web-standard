@@ -1,3 +1,49 @@
+<script setup lang="ts">
+import { format } from "date-fns";
+import { ref, onMounted } from "vue";
+import { fetchGetApi, fetchPutApi } from "~/server/api";
+import type { SubtaskTaskType } from "~/server/api-schema";
+
+const subtasks = ref<(SubtaskTaskType & { taskName: string })[]>([]);
+const subtaskStates = [
+  { id: 1, label: "Pending", color: "#F26B50" },
+  { id: 2, label: "In Progress", color: "#F2C450" },
+  { id: 3, label: "Done", color: "#96CF76" },
+];
+
+onMounted(async () => {
+  subtasks.value = await fetchGetApi<
+    (SubtaskTaskType & { taskName: string })[]
+  >("/Subtasks");
+});
+
+const getSubtasksByState = (stateId: number) =>
+  subtasks.value.filter((s) => s.subtaskStateId === stateId);
+
+const activeButtonStyle = (color: string) => ({
+  color: "white",
+  backgroundColor: color,
+});
+
+const updateSubtaskState = async (
+  subtask: SubtaskTaskType,
+  newStateId: number
+) => {
+  try {
+    await fetchPutApi(subtask.subtaskId, "/Subtasks", {
+      ...subtask,
+      subtaskStateId: newStateId,
+    });
+    const target = subtasks.value.find(
+      (s) => s.subtaskId === subtask.subtaskId
+    );
+    if (target) target.subtaskStateId = newStateId;
+  } catch (err) {
+    console.error("Error updating subtask state", err);
+  }
+};
+</script>
+
 <template>
   <div class="pa-4">
     <h1 class="text-h5 ">Subtasks</h1>
@@ -81,56 +127,3 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { format } from "date-fns";
-import { ref, onMounted } from "vue";
-import { fetchGetApi, fetchPutApi } from "~/server/api";
-import type { SubtaskTaskType } from "~/server/api-schema";
-
-const subtasks = ref<(SubtaskTaskType & { taskName: string })[]>([]);
-
-// Subtask states with colors and labels
-const subtaskStates = [
-  { id: 1, label: "Pending", color: "#F26B50" },
-  { id: 2, label: "In Progress", color: "#F2C450" },
-  { id: 3, label: "Done", color: "#96CF76" },
-];
-
-// Filter subtasks by their state id
-const getSubtasksByState = (stateId: number) =>
-  subtasks.value.filter((s) => s.subtaskStateId === stateId);
-
-// Style object for active state button
-const activeButtonStyle = (color: string) => ({
-  color: "white",
-  backgroundColor: color,
-});
-
-// Update subtask state both on backend and locally
-const updateSubtaskState = async (
-  subtask: SubtaskTaskType,
-  newStateId: number
-) => {
-  try {
-    await fetchPutApi(subtask.subtaskId, "/Subtasks", {
-      ...subtask,
-      subtaskStateId: newStateId,
-    });
-    // Update local state to keep UI in sync
-    const target = subtasks.value.find(
-      (s) => s.subtaskId === subtask.subtaskId
-    );
-    if (target) target.subtaskStateId = newStateId;
-  } catch (err) {
-    console.error("Error updating subtask state", err);
-  }
-};
-
-// On mount, load all subtasks with their associated task name
-onMounted(async () => {
-  // Assumes backend API returns all subtasks with a taskName field
-  subtasks.value = await fetchGetApi<
-    (SubtaskTaskType & { taskName: string })[]
-  >("/Subtasks");
-});
-</script>

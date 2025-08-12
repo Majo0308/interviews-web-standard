@@ -1,3 +1,54 @@
+<script setup lang="ts">
+import { format } from "date-fns";
+import { ref, onMounted } from "vue";
+import { useRoute } from "vue-router";
+import { fetchGetByIdApi, fetchPutApi } from "~/server/api";
+import type { TaskType, SubtaskType } from "~/server/api-schema";
+
+const route = useRoute();
+const task = ref<TaskType | null>(null);
+const subtaskStates = [
+  { id: 1, label: "Pendant", labelShort: "ToDo", color: "#F26B50" },
+  { id: 2, label: "In Progress", labelShort: "Doing", color: "#F2C450" },
+  { id: 3, label: "Done", labelShort: "Done", color: "#96CF76" },
+];
+
+onMounted(async () => {
+  const id = route.params.id;
+  const response = await fetchGetByIdApi<TaskType>(id, "/Tasks");
+  task.value = response;
+});
+
+const getSubtasksByState = (stateId: number) => {
+  return (
+    task.value?.subtasks?.filter(
+      (s: SubtaskType) => s.subtaskStateId === stateId
+    ) || []
+  );
+};
+
+const updateSubtaskState = async (
+  subtaskSent: SubtaskType,
+  newStateId: number
+) => {
+  try {
+    await fetchPutApi(subtaskSent?.subtaskId, `/Subtasks`, {
+      ...subtaskSent,
+      subtaskStateId: newStateId,
+    });
+
+    const subtask = task.value?.subtasks.find(
+      (s: SubtaskType) => s.subtaskId === subtaskSent.subtaskId
+    );
+    if (subtask) {
+      subtask.subtaskStateId = newStateId;
+    }
+  } catch (err) {
+    console.error("Error updating subtask state", err);
+  }
+};
+</script>
+
 <template>
   <v-container>
     <v-card class="pa-4">
@@ -120,54 +171,3 @@
   </v-container>
 </template>
 
-<script setup lang="ts">
-import { format } from "date-fns";
-import { ref, onMounted } from "vue";
-import { useRoute } from "vue-router";
-import { fetchGetByIdApi, fetchPutApi } from "~/server/api";
-import type { TaskType, SubtaskType } from "~/server/api-schema";
-
-const route = useRoute();
-const task = ref<TaskType | null>(null);
-
-const subtaskStates = [
-  { id: 1, label: "Pendant", labelShort: "ToDo", color: "#F26B50" },
-  { id: 2, label: "In Progress", labelShort: "Doing", color: "#F2C450" },
-  { id: 3, label: "Done", labelShort: "Done", color: "#96CF76" },
-];
-
-const getSubtasksByState = (stateId: number) => {
-  return (
-    task.value?.subtasks?.filter(
-      (s: SubtaskType) => s.subtaskStateId === stateId
-    ) || []
-  );
-};
-
-const updateSubtaskState = async (
-  subtaskSent: SubtaskType,
-  newStateId: number
-) => {
-  try {
-    await fetchPutApi(subtaskSent?.subtaskId, `/Subtasks`, {
-      ...subtaskSent,
-      subtaskStateId: newStateId,
-    });
-
-    const subtask = task.value?.subtasks.find(
-      (s: SubtaskType) => s.subtaskId === subtaskSent.subtaskId
-    );
-    if (subtask) {
-      subtask.subtaskStateId = newStateId;
-    }
-  } catch (err) {
-    console.error("Error updating subtask state", err);
-  }
-};
-
-onMounted(async () => {
-  const id = route.params.id;
-  const response = await fetchGetByIdApi<TaskType>(id, "/Tasks");
-  task.value = response;
-});
-</script>

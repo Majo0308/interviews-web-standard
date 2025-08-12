@@ -1,43 +1,3 @@
-<template>
-  <div>
-    <component
-      :is="isMdAndUp ? 'v-bottom-sheet' : 'v-dialog'"
-      v-model="sheetOpen"
-      :max-width="isMdAndUp ? undefined : 600"
-      persistent
-    >
-      <template #activator="{ props: activatorProps }">
-        <v-btn v-bind="activatorProps" color="primary" text="Add Task" />
-      </template>
-
-      <v-card>
-        <v-card-text class="pb-0">
-          <h1 class="text-h6">Task Form</h1>
-
-          <!-- Main Fields -->
-          <task-basic-fields
-            v-model="task"
-            :tags="tags"
-            @save="sendTask"
-            @toggle-subtasks="toggleSubtasksForm"
-            @cancel="cancelTask"
-          />
-
-          <!-- Secondary Fields -->
-          <v-expand-transition>
-            <subtasks-form
-              v-if="showSubtasksForm"
-              v-model="task"
-              :priority-options="priorityOptions"
-              :subtask-states="subtaskStates"
-            />
-          </v-expand-transition>
-        </v-card-text>
-      </v-card>
-    </component>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { ref, reactive, watch } from "vue";
 import { useDisplay } from "vuetify";
@@ -57,8 +17,6 @@ const props = defineProps<{
   modelValue?: TaskCreatedType | null;
   isEdit?: boolean;
 }>();
-
-const task = reactive<TaskCreatedType>(resetTask());
 
 watch(
   () => props.modelValue,
@@ -83,7 +41,7 @@ const subtaskStates = [
   { subtaskStateId: 3, stateName: "Completed" },
 ];
 
-async function sendTask() {
+const onSubmit = async () => {
   try {
     if (props.isEdit && task.taskItemId) {
       await fetchPutApi(task.taskItemId, "/Tasks", task);
@@ -95,23 +53,23 @@ async function sendTask() {
   } catch (err) {
     console.error("Error saving task:", err);
   }
-}
+};
 
-function closeForm() {
+const closeForm = () => {
   sheetOpen.value = false;
   resetForm();
-}
+};
 
-function cancelTask() {
+const cancelTask = () => {
   closeForm();
-}
+};
 
-function resetForm() {
+const resetForm = () => {
   Object.assign(task, resetTask());
   showSubtasksForm.value = false;
-}
+};
 
-function resetTask(): TaskCreatedType {
+const resetTask = (): TaskCreatedType => {
   return {
     taskItemId: 0,
     taskName: "",
@@ -122,16 +80,58 @@ function resetTask(): TaskCreatedType {
     tags: [],
     subtasks: [],
   };
-}
+};
 
-function loadTask(newTask: TaskCreatedType) {
+const loadTask = (newTask: TaskCreatedType) => {
   Object.assign(task, {
     ...newTask,
     taskDueDate: newTask.taskDueDate?.slice(0, 10),
   });
-}
+};
 
-function toggleSubtasksForm() {
+const toggleSubtasksForm = () => {
   showSubtasksForm.value = !showSubtasksForm.value;
-}
+};
+
+const task = reactive<TaskCreatedType>(resetTask());
 </script>
+
+<template>
+  <div>
+    <component
+      :is="!isMdAndUp || task.taskItemId != 0 ? 'v-dialog' : 'v-bottom-sheet'"
+      v-model="sheetOpen"
+      :max-width="!isMdAndUp || task.taskItemId != 0 ? 1200 : undefined"
+      persistent
+    >
+      <template #activator="{ props: activatorProps }">
+        <v-btn v-bind="activatorProps" color="primary" text="Add Task" />
+      </template>
+
+      <v-card>
+        <v-card-text class="pb-0">
+          <h1 class="text-h6">Task Form</h1>
+
+          <!-- Main Fields -->
+          <task-basic-fields
+            v-model="task"
+            :tags="tags"
+            @save="onSubmit"
+            @toggle-subtasks="toggleSubtasksForm"
+            @cancel="cancelTask"
+          />
+
+          <!-- Secondary Fields -->
+          <v-expand-transition>
+            <subtasks-form
+              v-if="showSubtasksForm"
+              v-model="task"
+              :priority-options="priorityOptions"
+              :subtask-states="subtaskStates"
+            />
+          </v-expand-transition>
+        </v-card-text>
+      </v-card>
+    </component>
+  </div>
+</template>

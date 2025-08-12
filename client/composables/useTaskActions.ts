@@ -1,7 +1,12 @@
-import { fetchDeleteApi, fetchGetApi, fetchGetByIdApi, fetchPutApi } from "~/server/api";
+import {
+  fetchDeleteApi,
+  fetchGetApi,
+  fetchGetByIdApi,
+  fetchPutApi,
+} from "~/server/api";
 import type { TaskType } from "~/server/api-schema";
 
-export function useTaskActions() {
+export const useTaskActions = () => {
   const deleteTask = async (taskId: number) => {
     await fetchDeleteApi(taskId, "/Tasks");
   };
@@ -11,4 +16,4 @@ export function useTaskActions() {
   };
 
   return { deleteTask, updateTaskCompletion };
-}
+};
