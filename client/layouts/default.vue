@@ -88,7 +88,7 @@ provide("refreshTags", getTags);
         <v-list-item
           @click="getViewSubtasks()"
           :active="selectedMenu === 'subtasks'"
-        >
+        > 
           <v-list-item-title>ALL SUBTASKS</v-list-item-title>
         </v-list-item>
 
