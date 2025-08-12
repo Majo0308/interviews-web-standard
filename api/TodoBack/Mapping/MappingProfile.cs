@@ -6,12 +6,11 @@ public class MappingProfile : Profile
 {
     public MappingProfile()
     {
-        // Subtask mappings
         CreateMap<Subtask, SubtaskDto>();
         CreateMap<SubtaskDto, Subtask>()
-            .ForMember(dest => dest.TaskItem, opt => opt.Ignore()) // Ignorar TaskItem al crear
-            .ForMember(dest => dest.SubtaskState, opt => opt.Ignore()); // Ignorar SubtaskState al crear
-                                                                        // Task mappings
+            .ForMember(dest => dest.TaskItem, opt => opt.Ignore()) 
+            .ForMember(dest => dest.SubtaskState, opt => opt.Ignore()); 
+                                                                        
         CreateMap<TaskCreateDto, TaskItem>()
           .ForMember(dest => dest.TaskTags, opt => opt.Ignore())
           .ForMember(dest => dest.Subtasks, opt => opt.Ignore())
@@ -22,11 +21,8 @@ public class MappingProfile : Profile
               )
           );
 
-
-
-
         CreateMap<TaskItem, TaskDto>()
             .ForMember(dest => dest.Tags, opt => opt.MapFrom(src => src.TaskTags.Select(tt => tt.Tag)))
-            .ForMember(dest => dest.Subtasks, opt => opt.MapFrom(src => src.Subtasks)); // Mapear subtasks
+            .ForMember(dest => dest.Subtasks, opt => opt.MapFrom(src => src.Subtasks)); 
     }
 }

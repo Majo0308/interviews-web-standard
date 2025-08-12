@@ -18,8 +18,8 @@ namespace TodoBack.Services
         public async Task<List<SubtaskStateDto>> GetAllAsync()
         {
             var subtasks = await _context.Subtasks
-                .Include(s => s.TaskItem)              // Incluir tarea relacionada
-                .Include(s => s.SubtaskState)      // Incluir estado relacionado (si existe)
+                .Include(s => s.TaskItem)              
+                .Include(s => s.SubtaskState)      
                 .Select(s => new SubtaskStateDto
                 {
                     SubtaskId = s.SubtaskId,
@@ -40,6 +40,7 @@ namespace TodoBack.Services
             var subtasks= await _context.Subtasks.FindAsync(id);
             return subtasks == null ? null : _mapper.Map<SubtaskDto>(subtasks);
         }
+
         public async Task<SubtaskDto> CreateAsync(SubtaskDto subtaskdto)
         {
             var taskExists = await _context.Tasks.AnyAsync(t => t.TaskItemId == subtaskdto.TaskItemId);
@@ -53,6 +54,58 @@ namespace TodoBack.Services
             await _context.SaveChangesAsync();
             return _mapper.Map<SubtaskDto>(subtask);
         }
+
+        public async Task<List<SubtaskDto>> CreateManyAsync(List<SubtaskDto> subtasksDto, TaskItem task)
+        { 
+            if (subtasksDto.Count() == 0)
+            {
+                return [];
+            }
+            
+            var subtasks = subtasksDto.Select(subtaskDto =>
+                {
+                    var subtask = _mapper.Map<Subtask>(subtaskDto);
+                    subtask.TaskItemId = task.TaskItemId;
+                    return subtask;
+                }).ToList();
+
+                _context.Subtasks.AddRange(subtasks);
+
+            await _context.SaveChangesAsync();
+            var subtasksCreated = _mapper.Map<List<SubtaskDto>>(subtasks);
+            return subtasksCreated;
+        }
+        public async Task<List<SubtaskDto>> SyncSubtasksAsync(List<SubtaskDto> subtasksDto, TaskItem task)
+        {
+            var existingSubtasks = task.Subtasks.ToList();
+
+            foreach (var subtaskDto in subtasksDto)
+            {
+                if (subtaskDto.SubtaskId == 0)
+                {
+                    subtaskDto.TaskItemId = task.TaskItemId;
+                    await CreateAsync(subtaskDto);
+                }
+                else
+                {
+                    await UpdateAsync(subtaskDto.SubtaskId, subtaskDto);
+                }
+            }
+
+            // Delete subtasks that are not in the incoming list
+            var dtoIds = subtasksDto.Select(s => s.SubtaskId).ToList();
+            var subtasksToRemove = existingSubtasks
+                .Where(s => !dtoIds.Contains(s.SubtaskId))
+                .ToList();
+            _context.Subtasks.RemoveRange(subtasksToRemove);
+
+            var updatedSubtasks = await _context.Subtasks
+               .Where(s => s.TaskItemId == task.TaskItemId)
+               .ToListAsync();
+                    return _mapper.Map<List<SubtaskDto>>(updatedSubtasks);
+                }
+
+
         public async Task<SubtaskDto?> UpdateAsync(int id, SubtaskDto subtaskDto)
         {
             var existingSubtask = await _context.Subtasks.FindAsync(id);

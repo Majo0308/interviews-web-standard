@@ -1,4 +1,4 @@
-namespace TestTodo
+namespace TodoTests
 {
     public class UnitTest1
     {
