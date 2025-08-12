@@ -6,6 +6,8 @@ namespace TodoBack.Services
     public interface ISubtaskService
     {
         Task<SubtaskDto> CreateAsync(SubtaskDto subtask);
+        Task<List<SubtaskDto>> CreateManyAsync(List<SubtaskDto> subtasksDto, TaskItem task);
+        Task<List<SubtaskDto>> SyncSubtasksAsync(List<SubtaskDto> subtasksDto, TaskItem task);
         Task<SubtaskDto?> GetByIdAsync(int id);
         Task<List<SubtaskStateDto>> GetAllAsync();
         Task<SubtaskDto> UpdateAsync(int id, SubtaskDto subtask);

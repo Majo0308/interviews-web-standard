@@ -6,7 +6,7 @@ using TodoBack.Services;
 namespace TodoBack.Controllers
 {
     [ApiController]
-    [Route("api/tasks")]
+    [Route("api/[controller]")]
     public class TasksController : ControllerBase
     {
         private readonly ITaskService _service;
@@ -20,6 +20,13 @@ namespace TodoBack.Controllers
         public async Task<ActionResult<List<TaskDto>>> GetAll()
         {
             var tasks = await _service.GetAllAsync();
+            return Ok(tasks);
+        }
+
+        [HttpGet("Today")]        
+        public async Task<ActionResult<List<TaskDto>>> GetAllToday()
+        {
+            var tasks = await _service.GetAllTodayAsync();
             return Ok(tasks);
         }
 
@@ -39,7 +46,7 @@ namespace TodoBack.Controllers
         public async Task<ActionResult<TaskDto>> Create(TaskCreateDto task)
         {
             var created = await _service.CreateAsync(task);
-            return CreatedAtAction(nameof(GetById), new { id = created.TaskItemId }, created);
+            return created;
         }
 
         [HttpPut("{id}")]
