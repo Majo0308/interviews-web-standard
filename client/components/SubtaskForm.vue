@@ -79,6 +79,7 @@ const removeSubtask = (index: number) => {
           dense
         />
       </v-col>
+      
       <v-col cols="auto">
         <v-tooltip text="Delete Subtask" location="top">
           <template v-slot:activator="{ props }">
