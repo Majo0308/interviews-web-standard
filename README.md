@@ -66,10 +66,11 @@ _Subtasks organized by state with ability to update status._
 - The app will open at `http://localhost:3000`.
 
 ---
+## Tests
+- Tests for TaskServices
 
-## Notes
-
-- Testing is pending and will be added soon.  
+---
+## Notes  
 - Contributions and feedback are welcome!
 
 ---
