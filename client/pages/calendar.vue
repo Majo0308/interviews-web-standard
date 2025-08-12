@@ -1,41 +1,3 @@
-<template>
-  <v-container>
-    <v-sheet
-      class="d-flex"
-      height="54"
-      tile
-    >
-      <v-select
-        v-model="type"
-        :items="types"
-        class="ma-2"
-        density="compact"
-        label="View Mode"
-        variant="outlined"
-        hide-details
-      ></v-select>
-      <v-select
-        v-model="weekday"
-        :items="weekdays"
-        class="ma-2"
-        density="compact"
-        label="weekdays"
-        variant="outlined"
-        hide-details
-      ></v-select>
-    </v-sheet>
-    <v-sheet>
-      <v-calendar
-        ref="calendar"
-        v-model="value"
-        :events="events"
-        :view-mode="type"
-        :weekdays="weekday"
-      ></v-calendar>
-    </v-sheet>
-</v-container>
-</template>
-
 <script>
 import { useDate } from 'vuetify'
 import { fetchGetApi } from '~/server/api'
@@ -86,3 +48,42 @@ export default {
   },
 }
 </script>
+
+<template>
+  <v-container>
+    <v-sheet
+      class="d-flex"
+      height="54"
+      tile
+    >
+      <v-select
+        v-model="type"
+        :items="types"
+        class="ma-2"
+        density="compact"
+        label="View Mode"
+        variant="outlined"
+        hide-details
+      ></v-select>
+      <v-select
+        v-model="weekday"
+        :items="weekdays"
+        class="ma-2"
+        density="compact"
+        label="weekdays"
+        variant="outlined"
+        hide-details
+      ></v-select>
+    </v-sheet>
+    <v-sheet>
+      <v-calendar
+        ref="calendar"
+        v-model="value"
+        :events="events"
+        :view-mode="type"
+        :weekdays="weekday"
+      ></v-calendar>
+    </v-sheet>
+</v-container>
+</template>
+

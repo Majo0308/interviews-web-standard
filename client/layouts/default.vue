@@ -1,59 +1,49 @@
 <script setup lang="ts">
 import { provide, ref, onMounted, watch } from "vue";
 import { useDisplay } from "vuetify";
-import { fetchGetApi, fetchPostApi } from "~/server/api";
+import { fetchGetApi } from "~/server/api";
 import type { TagType } from "~/server/api-schema";
 
 const { mdAndDown } = useDisplay();
-
 const drawerOpen = ref(false);
-
-const tagName = ref("");
 const tags = ref<TagType[]>([]);
 const selectedTag = ref<number | null>(null);
-
+const selectedMenu = ref<string | number | null>('all-tasks');
 provide("tags", tags);
 provide("selectedTag", selectedTag);
 
 onMounted(() => {
   getTags();
-  drawerOpen.value = !mdAndDown.value; 
+  drawerOpen.value = !mdAndDown.value;
 });
 
 watch(mdAndDown, (val) => {
   drawerOpen.value = !val;
 });
 
-function selectTag(id: number) {
+const selectTag = (id: number) => {
+  selectedMenu.value = id == 0 ? "all-tasks" : `tag-${id}`;
   selectedTag.value = id;
   navigateTo("/");
-  if (mdAndDown.value) drawerOpen.value = false; 
-}
+  if (mdAndDown.value) drawerOpen.value = false;
+};
 
-const getCalendar = async () => {
+const getViewCalendar = async () => {
+  selectedMenu.value = "calendar";
   navigateTo("/calendar");
   if (mdAndDown.value) drawerOpen.value = false;
 };
-const getCategories = async () => {
+
+const getViewTag = async () => {
+  selectedMenu.value = "tags";
   navigateTo("/tags");
   if (mdAndDown.value) drawerOpen.value = false;
 };
-const getSubtasks = async () => {
+
+const getViewSubtasks = async () => {
+  selectedMenu.value = "subtasks";
   navigateTo("/subtasks");
   if (mdAndDown.value) drawerOpen.value = false;
-};
-const postTag = async () => {
-  const newTag: TagType = {
-    tagId: 0,
-    tagName: tagName.value,
-  };
-
-  try {
-    const response = await fetchPostApi<TagType>("/Tags", newTag);
-    tags.value.push(response);
-  } catch (err) {
-    console.error("Error saving tag:", err);
-  }
 };
 
 const getTags = async () => {
@@ -64,12 +54,14 @@ const getTags = async () => {
     console.error("Error fetching tags:", err);
   }
 };
+
+
 provide("refreshTags", getTags);
 </script>
 
 <template>
   <v-app>
-    <v-app-bar app>
+    <v-app-bar app style="background-color: #323ab3; color: white">
       <v-app-bar-nav-icon v-if="mdAndDown" @click="drawerOpen = !drawerOpen" />
       <v-toolbar-title>My Task App</v-toolbar-title>
     </v-app-bar>
@@ -82,19 +74,32 @@ provide("refreshTags", getTags);
       width="280"
     >
       <v-list>
-        <v-list-item @click="selectTag(0)">
+        <v-list-item
+          @click="selectTag(0)"
+          :active="selectedMenu === 'all-tasks'"
+        >
           <v-list-item-title>ALL TASKS</v-list-item-title>
         </v-list-item>
 
-        <v-list-item @click="getSubtasks()">
+        <v-list-item @click="selectTag(-1)" :active="selectedMenu === 'tag--1'">
+          <v-list-item-title>TASK TODAY</v-list-item-title>
+        </v-list-item>
+
+        <v-list-item
+          @click="getViewSubtasks()"
+          :active="selectedMenu === 'subtasks'"
+        > 
           <v-list-item-title>ALL SUBTASKS</v-list-item-title>
         </v-list-item>
 
-        <v-list-item @click="getCategories()">
+        <v-list-item @click="getViewTag()" :active="selectedMenu === 'tags'">
           <v-list-item-title>TAGS</v-list-item-title>
         </v-list-item>
 
-        <v-list-item @click="getCalendar()">
+        <v-list-item
+          @click="getViewCalendar()"
+          :active="selectedMenu === 'calendar'"
+        >
           <v-list-item-title>CALENDAR</v-list-item-title>
         </v-list-item>
 
@@ -105,19 +110,12 @@ provide("refreshTags", getTags);
           :key="tag.tagId"
           :value="tag.tagId"
           @click="selectTag(tag.tagId)"
-          :active="selectedTag === tag.tagId"
+          :active="selectedMenu === `tag-${tag.tagId}`"
         >
           <v-list-item-title>{{ tag.tagName }}</v-list-item-title>
         </v-list-item>
 
-        <v-list-item>
-          <div style="display: flex; gap: 8px">
-            <v-text-field v-model="tagName" label="New Tag" outlined dense />
-            <v-btn icon @click="postTag">
-              <v-icon>mdi-plus</v-icon>
-            </v-btn>
-          </div>
-        </v-list-item>
+
       </v-list>
     </v-navigation-drawer>
 
